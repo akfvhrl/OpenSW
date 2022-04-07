@@ -48,22 +48,7 @@ public class searcher {
 
 		Double [][] array = new Double[kl.size()][((HashMap) hashMap.get(kl.get(0).getString())).size()];
 
-		for(int i = 0; i< kl.size(); i++) {
-			Keyword kwrd = kl.get(i);
-
-			for(int j = 0; j < ((HashMap) hashMap.get(kl.get(0).getString())).size();j++) {
-				array[i][j] = kwrd.getCnt() * (Double)((HashMap) hashMap.get(kwrd.getString())).get(j);
-				System.out.println((Double)((HashMap) hashMap.get(kwrd.getString())).get(j));
-			}
-		}
-		Double[] calcSim = new Double[((HashMap) hashMap.get(kl.get(0).getString())).size()];
-
-		for(int i = 0; i< ((HashMap) hashMap.get(kl.get(0).getString())).size(); i++) {
-			calcSim[i] = (double) 0;
-			for(int j = 0; j < kl.size();j++) {
-				calcSim[i] += array[j][i];
-			}
-		}
+		Double[] calcSim = CalcSim(kl, array, hashMap);
 
 
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -115,7 +100,25 @@ public class searcher {
 
 	}
 
+	public Double[] CalcSim(KeywordList kl, Double [][] array, HashMap hashMap) {
+		for (int i = 0; i < kl.size(); i++) {
+			Keyword kwrd = kl.get(i);
 
+			for (int j = 0; j < ((HashMap) hashMap.get(kl.get(0).getString())).size(); j++) {
+				array[i][j] = kwrd.getCnt() * (Double) ((HashMap) hashMap.get(kwrd.getString())).get(j);
+				System.out.println((Double) ((HashMap) hashMap.get(kwrd.getString())).get(j));
+			}
+		}
+		Double[] calcSim = new Double[((HashMap) hashMap.get(kl.get(0).getString())).size()];
+
+		for (int i = 0; i < ((HashMap) hashMap.get(kl.get(0).getString())).size(); i++) {
+			calcSim[i] = (double) 0;
+			for (int j = 0; j < kl.size(); j++) {
+				calcSim[i] += array[j][i];
+			}
+		}
+		return calcSim;
+	}
 
 
 	public void searchXml(){
