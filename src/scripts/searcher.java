@@ -46,9 +46,8 @@ public class searcher {
 		KeywordExtractor ke = new KeywordExtractor();
 		KeywordList kl = ke.extractKeyword(this.input_word, true);
 
-		Double [][] array = new Double[kl.size()][((HashMap) hashMap.get(kl.get(0).getString())).size()];
-
-		Double[] calcSim = CalcSim(kl, array, hashMap);
+		Double[] innerProduct = InnerProduct(kl, hashMap);
+		Double[] calcSim = CalcSim(innerProduct, kl, hashMap);
 
 
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -82,7 +81,8 @@ public class searcher {
 		entryList.sort(new Comparator<Map.Entry<String, Double>>() {
 			@Override
 			public int compare(Map.Entry<String, Double> o1, Map.Entry<String, Double> o2) {
-				return (int) (o2.getValue() - o1.getValue());
+				double temp = (o2.getValue() - o1.getValue())*100;
+				return (int) temp;
 			}
 		});
 		int cnt = 0;
@@ -100,21 +100,52 @@ public class searcher {
 
 	}
 
-	public Double[] CalcSim(KeywordList kl, Double [][] array, HashMap hashMap) {
+	public Double[] InnerProduct(KeywordList kl, HashMap hashMap) {
+		Double [][] array = new Double[kl.size()][((HashMap) hashMap.get(kl.get(0).getString())).size()];
 		for (int i = 0; i < kl.size(); i++) {
 			Keyword kwrd = kl.get(i);
 
-			for (int j = 0; j < ((HashMap) hashMap.get(kl.get(0).getString())).size(); j++) {
+			for (int j = 0; j < ((HashMap) hashMap.get(kl.get(i).getString())).size(); j++) {
 				array[i][j] = kwrd.getCnt() * (Double) ((HashMap) hashMap.get(kwrd.getString())).get(j);
-				System.out.println((Double) ((HashMap) hashMap.get(kwrd.getString())).get(j));
 			}
 		}
-		Double[] calcSim = new Double[((HashMap) hashMap.get(kl.get(0).getString())).size()];
+		Double[] Q_id = new Double[((HashMap) hashMap.get(kl.get(0).getString())).size()];
 
 		for (int i = 0; i < ((HashMap) hashMap.get(kl.get(0).getString())).size(); i++) {
-			calcSim[i] = (double) 0;
+			Q_id[i] = (double)0;
 			for (int j = 0; j < kl.size(); j++) {
-				calcSim[i] += array[j][i];
+				Q_id[i] += array[j][i];
+			}
+		}
+		return Q_id;
+	}
+	
+	public Double[] CalcSim(Double[] innerProdcuct, KeywordList kl, HashMap hashMap){
+		Double[] calcSim = new Double[((HashMap) hashMap.get(kl.get(0).getString())).size()];
+		int sumKw = 0;
+		for(int i = 0; i<kl.size(); i++){
+			Keyword kwrd = kl.get(i);
+			sumKw += kwrd.getCnt() * kwrd.getCnt();
+		}
+		Double rootKw = Math.sqrt(sumKw);
+
+
+		Double[] rootHash = new Double[((HashMap) hashMap.get(kl.get(0).getString())).size()];
+		for(int i = 0; i < ((HashMap) hashMap.get(kl.get(0).getString())).size(); i++){
+			int sumHash = 0;
+			for(int j = 0; j < kl.size(); j++){
+				Keyword kwrd = kl.get(j);
+				sumHash += (Double) ((HashMap) hashMap.get(kwrd.getString())).get(i);
+			}
+			sumHash = sumHash * sumHash;
+			rootHash[i] = Math.sqrt(sumHash);
+		}
+
+		for(int i = 0; i < ((HashMap) hashMap.get(kl.get(0).getString())).size(); i++){
+			Double temp = rootKw * rootHash[i];
+			calcSim[i] = (double) 0;
+			if(temp != 0) {
+				calcSim[i] = innerProdcuct[i] / temp;
 			}
 		}
 		return calcSim;
