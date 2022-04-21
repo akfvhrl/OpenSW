@@ -24,5 +24,10 @@ public class kuir {
 			search.searchXml();
 
 		}
+		else if(command.equals("-m")){
+
+			MidTerm showSnippet = new MidTerm();
+			showSnippet.showSnippet(path, args[3]);
+		}
 	}
 }
